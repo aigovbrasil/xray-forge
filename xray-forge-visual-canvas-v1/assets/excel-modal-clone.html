@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FORGE — Gold Standard Modal Clone</title>
+
+<!--
+  GOLD STANDARD REFERENCE
+  =======================
+  This is the canonical clone reference for FORGE Visual Canvas.
+  It demonstrates the complete pipeline: structure → tokens → finish.
+
+  When asked for a "modal clone", "pixel-perfect replica", or
+  "production-grade artifact", reference this file's decisions.
+
+  Key decisions (see references/brand-tokens.md):
+  - Two-panel layout (52% left / 48% right) inside rounded modal
+  - Modal radius: 20px (matches brand-tokens "modal" tier)
+  - Modal shadow: 0 32px 80px rgba(0,0,0,0.45) (functional, not decorative)
+  - Headline: Georgia serif, 28px, weight 800
+  - Bullet body: 13px, 1.55 line-height
+  - CTA: solid #111 bg with 10px radius
+  - Ghost button: transparent + 1.5px solid #d0d0d0
+  - Close button: rgba(255,255,255,0.92) circle 30x30
+  - Window chrome: #2d2d2d titlebar with traffic-light dots
+  - Data highlight: #4ade80 green for values, #60a5fa blue for formulas
+  - Chart: Q3 muted (#4a5568), Q4 accent (#4ade80)
+-->
+
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    min-height: 100vh;
+    background: rgba(0,0,0,0.52);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+
+  /* ── MODAL SHELL ── */
+  .modal {
+    display: flex;
+    width: 680px;
+    max-width: 100%;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.45);
+    background: #fff;
+  }
+
+  /* ── LEFT PANEL ── */
+  .left {
+    flex: 0 0 52%;
+    background: #fff;
+    padding: 36px 32px 28px;
+    display: flex;
+    flex-direction: column;
+  }
+  .badge {
+    display: inline-block;
+    background: #dbeafe;
+    color: #1e40af;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    padding: 4px 10px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+    width: fit-content;
+  }
+  .headline {
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1.22;
+    color: #111;
+    letter-spacing: -0.4px;
+    margin-bottom: 22px;
+    font-family: Georgia, serif;
+  }
+  .bullets {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+  .bullets li {
+    display: flex;
+    gap: 10px;
+    font-size: 13px;
+    color: #1a1a1a;
+    line-height: 1.55;
+  }
+  .bullets li::before {
+    content: '•';
+    color: #1a1a1a;
+    font-size: 16px;
+    line-height: 1.4;
+    flex-shrink: 0;
+  }
+  .btn-primary {
+    display: block;
+    width: 100%;
+    background: #111;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 14px;
+    font-size: 14.5px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 10px;
+    font-family: inherit;
+  }
+  .btn-secondary {
+    display: block;
+    width: 100%;
+    background: transparent;
+    color: #111;
+    border: 1.5px solid #d0d0d0;
+    border-radius: 10px;
+    padding: 13px;
+    font-size: 14.5px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .btn-primary:hover { background: #222; }
+  .btn-secondary:hover { background: #f5f5f5; }
+
+  /* ── RIGHT PANEL ── */
+  .right {
+    flex: 0 0 48%;
+    background: #1e7e34;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 28px 20px;
+    min-height: 480px;
+  }
+  .close-btn {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 30px;
+    height: 30px;
+    background: rgba(255,255,255,0.92);
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    color: #333;
+    font-weight: 600;
+    z-index: 10;
+  }
+
+  /* ── EXCEL WINDOW ── */
+  .excel-window {
+    background: #1e1e1e;
+    border-radius: 8px;
+    overflow: hidden;
+    width: 100%;
+    max-width: 300px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+  .win-titlebar {
+    background: #2d2d2d;
+    padding: 8px 10px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-red    { background: #ff5f57; }
+  .dot-yellow { background: #ffbd2e; }
+  .dot-green  { background: #28c840; }
+
+  /* ── SPREADSHEET TABLE ── */
+  .spreadsheet { font-size: 9.5px; color: #ccc; font-family: 'SF Mono', Consolas, monospace; }
+  table.sheet  { width: 100%; border-collapse: collapse; }
+  table.sheet th,
+  table.sheet td {
+    padding: 3px 6px;
+    border-right:  0.5px solid #333;
+    border-bottom: 0.5px solid #333;
+    font-size: 9px;
+    white-space: nowrap;
+  }
+  table.sheet th { background: #2a2a2a; color: #888; text-align: center; font-weight: 500; }
+  .row-num    { background: #2a2a2a; color: #888; text-align: center; min-width: 20px; }
+  .bold-cell  { font-weight: 700; color: #e0e0e0; }
+  .green-val  { color: #4ade80; }
+  .blue-val   { color: #60a5fa; }
+  .highlight-cell { background: #2a4a2a; }
+
+  /* ── BAR CHART ── */
+  .chart-area  { padding: 8px 10px 10px; background: #1e1e1e; border-top: 0.5px solid #333; }
+  .chart-label { font-size: 7.5px; color: #888; letter-spacing: 0.06em; margin-bottom: 6px; font-family: sans-serif; }
+  .bars-row    { display: flex; align-items: flex-end; gap: 8px; height: 52px; }
+  .bar-group   { display: flex; flex-direction: column; align-items: center; gap: 2px; flex: 1; }
+  .bar-pair    { display: flex; align-items: flex-end; gap: 2px; height: 44px; }
+  .bar         { width: 10px; border-radius: 2px 2px 0 0; }
+  .bar-q3      { background: #4a5568; }
+  .bar-q4      { background: #4ade80; }
+  .bar-label   { font-size: 6.5px; color: #666; font-family: sans-serif; margin-top: 2px; }
+  .legend      { display: flex; gap: 8px; margin-top: 5px; justify-content: center; }
+  .legend-item { display: flex; align-items: center; gap: 3px; font-size: 6.5px; color: #888; font-family: sans-serif; }
+  .legend-dot  { width: 6px; height: 6px; border-radius: 50%; }
+</style>
+</head>
+<body>
+
+<div class="modal">
+
+  <!-- LEFT PANEL -->
+  <div class="left">
+    <span class="badge">NOVO</span>
+    <h1 class="headline">Turbine suas planilhas com o Claude no Excel</h1>
+    <ul class="bullets">
+      <li>Construa modelos financeiros, analise dados e crie tabelas e gráficos com o Claude diretamente no Excel</li>
+      <li>Transforme tarefas complexas com dados ou limpeza de dados desorganizados em conversas simples</li>
+      <li>Disponível com um plano Claude Pro, Max, Team ou Enterprise</li>
+    </ul>
+    <button class="btn-primary">Obter Claude no Excel</button>
+    <button class="btn-secondary">Talvez depois</button>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right">
+    <button class="close-btn">✕</button>
+    <div class="excel-window">
+
+      <div class="win-titlebar">
+        <div class="dot dot-red"></div>
+        <div class="dot dot-yellow"></div>
+        <div class="dot dot-green"></div>
+      </div>
+
+      <div class="spreadsheet">
+        <table class="sheet">
+          <tr>
+            <th class="row-num"></th>
+            <th>A</th><th>B</th><th>C</th><th>D</th><th>E</th>
+          </tr>
+          <tr>
+            <td class="row-num">1</td>
+            <td class="bold-cell">Region</td>
+            <td class="bold-cell">Q3 Rev</td>
+            <td class="bold-cell">Q4 Rev</td>
+            <td class="bold-cell">Growth</td>
+            <td class="bold-cell">Contrib %</td>
+          </tr>
+          <tr>
+            <td class="row-num">2</td>
+            <td>North</td><td>$45.2M</td><td>$52.1M</td>
+            <td class="green-val">+15.3%</td><td>24.8%</td>
+          </tr>
+          <tr>
+            <td class="row-num">3</td>
+            <td>South</td><td>$38.1M</td><td>$41.4M</td>
+            <td class="green-val">+8.7%</td><td>19.7%</td>
+          </tr>
+          <tr>
+            <td class="row-num">4</td>
+            <td>East</td><td>$62.8M</td><td>$71.2M</td>
+            <td class="green-val">+13.4%</td><td>33.9%</td>
+          </tr>
+          <tr>
+            <td class="row-num">5</td>
+            <td>West</td><td>$41.5M</td><td>$45.3M</td>
+            <td class="green-val">+9.2%</td><td>21.6%</td>
+          </tr>
+          <tr>
+            <td class="row-num">6</td>
+            <td class="bold-cell">Total</td>
+            <td class="bold-cell">$187.6M</td>
+            <td class="bold-cell">$210.0M</td>
+            <td class="bold-cell green-val">+11.9%</td>
+            <td class="bold-cell">100%</td>
+          </tr>
+          <tr><td class="row-num">7</td><td colspan="5"></td></tr>
+          <tr>
+            <td class="row-num">8</td>
+            <td>IRR</td>
+            <td class="blue-val">=XIRR(...)</td>
+            <td colspan="2" class="highlight-cell blue-val" style="font-weight:700;">18.2%</td>
+            <td></td>
+          </tr>
+          <tr>
+            <td class="row-num">9</td>
+            <td>MOIC</td>
+            <td class="blue-val">=D6/B6</td>
+            <td colspan="2" class="highlight-cell blue-val" style="font-weight:700;">2.3x</td>
+            <td></td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="chart-area">
+        <div class="chart-label">REVENUE BY REGION ($M)</div>
+        <div class="bars-row">
+          <div class="bar-group">
+            <div class="bar-pair">
+              <div class="bar bar-q3" style="height:32px;"></div>
+              <div class="bar bar-q4" style="height:38px;"></div>
+            </div>
+            <div class="bar-label">North</div>
+          </div>
+          <div class="bar-group">
+            <div class="bar-pair">
+              <div class="bar bar-q3" style="height:27px;"></div>
+              <div class="bar bar-q4" style="height:30px;"></div>
+            </div>
+            <div class="bar-label">South</div>
+          </div>
+          <div class="bar-group">
+            <div class="bar-pair">
+              <div class="bar bar-q3" style="height:44px;"></div>
+              <div class="bar bar-q4" style="height:50px;"></div>
+            </div>
+            <div class="bar-label">East</div>
+          </div>
+          <div class="bar-group">
+            <div class="bar-pair">
+              <div class="bar bar-q3" style="height:30px;"></div>
+              <div class="bar bar-q4" style="height:33px;"></div>
+            </div>
+            <div class="bar-label">West</div>
+          </div>
+        </div>
+        <div class="legend">
+          <div class="legend-item">
+            <div class="legend-dot" style="background:#4a5568;"></div>Q3 2024
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background:#4ade80;"></div>Q4 2024
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
